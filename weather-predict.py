@@ -186,7 +186,7 @@ if len(opts) > 0:
             dt = datetime.now()+timedelta(days=1)
             tmp = [datetime_to_array(dt)]
             result = nn_predict(model, np.array(tmp)).round(1)
-            locale.setlocale(locale.LC_ALL, "ru_RU")
+            locale.setlocale(locale.LC_ALL, "ru_RU.utf8")
 
             banner.banner(result[0], 0.1420, plt, dt.strftime("%d.%m.%Y"))
         elif o in ("-t", "--train"):
