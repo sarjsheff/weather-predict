@@ -3,14 +3,25 @@ from wand.drawing import Drawing
 from io import BytesIO
 
 
-def banner(temp, loss,resultplt=None):
-    with Image(width=140, height=230, background="white") as img:
+def banner(temp, loss, resultplt=None, date=""):
+    txt_color = "white"
+    with Image(width=140, height=230, background="transparent") as img:
         draw = Drawing()
         draw.font = 'font/OpenSans-Bold.ttf'
         draw.font_size = 14
         draw.font_antialias = True
         draw.text_alignment = 'center'
+        draw.fill_color = txt_color
         draw.text(70, 14, 'Moscow')
+        draw(img)
+
+        draw = Drawing()
+        draw.font = 'font/OpenSans-Bold.ttf'
+        draw.font_size = 10
+        draw.font_antialias = True
+        draw.text_alignment = 'center'
+        draw.fill_color = txt_color
+        draw.text(70, 28, date)
         draw(img)
 
         draw = Drawing()
@@ -18,16 +29,17 @@ def banner(temp, loss,resultplt=None):
         draw.font_size = 50
         draw.font_antialias = True
         draw.text_alignment = 'center'
-        draw.text(70, 70, "%+d" % float(temp)+'°')
+        draw.fill_color = txt_color
+        draw.text(70, 80, "%+d" % float(temp)+'°')
         draw(img)
- 
+
         if resultplt:
             image_data = BytesIO()
             resultplt.axis('off')
             resultplt.gcf().set_size_inches(1.4, 0.7)
             resultplt.gcf().set_dpi(100)
             resultplt.tight_layout()
-            resultplt.savefig(image_data, format='png')
+            resultplt.savefig(image_data, format='png',transparent=True)
             image_data.seek(0)
             result_image = Image(file=image_data)
             img.composite(image=result_image,left=0,top=110)
@@ -37,6 +49,7 @@ def banner(temp, loss,resultplt=None):
             draw.font_size = 14
             draw.font_antialias = True
             draw.text_alignment = 'center'
+            draw.fill_color = txt_color
             draw.text(70, 115, '2020')
             draw(img)
 
@@ -46,6 +59,7 @@ def banner(temp, loss,resultplt=None):
             draw.font = 'font/OpenSans-Light.ttf'
             draw.font_size = 10
             draw.font_antialias = True
+            draw.fill_color = txt_color
             draw.text(4, 190+(i*12), t)
             draw(img)
 

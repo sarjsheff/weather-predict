@@ -182,11 +182,13 @@ if len(opts) > 0:
             result = nn_predict(model, np.array(tmp)).round(1)
 
             plt.plot(result)
-            #plt.xlabel('Day of 2020 year')
-            #plt.ylabel('C°')
-            # plt.show()
 
-            banner.banner(10, 10, plt)
+            dt = datetime.now()+timedelta(days=1)
+            tmp = [datetime_to_array(dt)]
+            result = nn_predict(model, np.array(tmp)).round(1)
+            locale.setlocale(locale.LC_ALL, "ru_RU")
+
+            banner.banner(result[0], 0.1420, plt, dt.strftime("%d.%m.%Y"))
         elif o in ("-t", "--train"):
             train = True
         elif o in ("--epochs"):
