@@ -1,8 +1,10 @@
-import sys, getopt
+import sys
+import getopt
 import tensorflow as tf
 import locale
 import numpy as np
 import pandas as pd
+import banner
 from datetime import datetime
 import matplotlib.pyplot as plt
 from astral import LocationInfo
@@ -128,7 +130,7 @@ def nn_train(model,xdata, ydata, pdata,epochs=10):
     # xs = tf.constant(xdata, dtype='float32')
     # ys = tf.constant(ydata, dtype='float32')
 
-    hist = model.fit(xdata, ydata, epochs=epochs,  verbose=1)
+    hist = model.fit(xdata, ydata, epochs=epochs,  verbose=1,validation_split=0.9)
     model.save_weights("weather.model/weather.weights")
 
     result = nn_predict(model,pdata)
@@ -153,14 +155,17 @@ def nn_predict(model,pdata):
 
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:] , "td" ,["train","demo"])
+    opts, args = getopt.getopt(sys.argv[1:], "tdb", ["train", "demo", "epochs=", "banner"])
 except getopt.GetoptError:
     print('--train --demo')
     sys.exit(2)
 
+
+train = False
+
 if len(opts) > 0:
     for o, a in opts:
-        if o in ("-d","--demo"):
+        if o in ("-d", "--demo"):
             print("demo")
             model = nn_model(9)
 
@@ -168,17 +173,35 @@ if len(opts) > 0:
             for i in range(5):
                 tmp.append(datetime_to_array(datetime.now() + timedelta(days=i)))
             print(tmp)
-            print(nn_predict(model,np.array(tmp)).round(1))
-        elif o in ("-t","--train"):
-            df = traindata()
-
-            print(df)
-
+            print(nn_predict(model, np.array(tmp)).round(1))
+        elif o in ("-b", "--banner"):
+            model = nn_model(9)
             tmp = []
             for i in range(365):
                 tmp.append(datetime_to_array(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0, month=1, day=1) + timedelta(days=i)))
+            result = nn_predict(model, np.array(tmp)).round(1)
 
-            model = nn_model(xdata.shape[1])
-            nn_train(model,df[['year', 'month', 'day', 'dayofyear', 'dawn', 'sunrise', 'noon', 'sunset', 'dusk']].to_numpy(), df.avg.to_numpy(), np.array(tmp))
+            plt.plot(result)
+            #plt.xlabel('Day of 2020 year')
+            #plt.ylabel('C°')
+            # plt.show()
+
+            banner.banner(10, 10, plt)
+        elif o in ("-t", "--train"):
+            train = True
+        elif o in ("--epochs"):
+            epochs = a
 else:
-    print("--demo --train")
+    print("--demo --train --banner")
+
+if train is True:
+    df = traindata()
+
+    print(df)
+
+    tmp = []
+    for i in range(365):
+        tmp.append(datetime_to_array(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0, month=1, day=1) + timedelta(days=i)))
+
+    model = nn_model(9)
+    nn_train(model,df[['year', 'month', 'day', 'dayofyear', 'dawn', 'sunrise', 'noon', 'sunset', 'dusk']].to_numpy(), df.avg.to_numpy(), np.array(tmp),int(epochs))
